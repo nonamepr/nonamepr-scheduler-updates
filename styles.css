@@ -131,11 +131,11 @@ select.input option { color: #111; background: #fff; }
 .add-bar .input { flex: 1; }
 .add-btn { width: 56px; flex-shrink: 0; font-size: 22px; padding: 0; }
 
-.menu-btn {
-  position: fixed; top: calc(14px + var(--safe-t)); right: 12px;
-  width: 40px; height: 40px; border-radius: 20px;
-  background: rgba(255,255,255,0.08); border: none; color: var(--muted);
-  font-size: 20px; cursor: pointer; z-index: 5;
+/* 메뉴는 진행률 줄 오른쪽 끝에 둔다.
+   상단에 고정하면 '다음 날' 버튼과 겹친다. */
+.menu-chip {
+  width: 40px; padding: 6px 0; text-align: center;
+  font-size: 18px; line-height: 1; color: var(--muted);
 }
 
 /* ---------- 상세 ---------- */
