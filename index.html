@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+    <title>무명기획 스케줄러</title>
+    <meta name="theme-color" content="#12141a" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="스케줄러" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- 로그인 -->
+    <section id="login" class="screen hidden">
+      <form id="login-form" class="login-box">
+        <img src="icons/icon-192.png" alt="" class="login-logo" />
+        <h1>무명기획 스케줄러</h1>
+        <input id="login-email" class="input" type="email" placeholder="이메일"
+               autocomplete="username" inputmode="email" autocapitalize="off" />
+        <input id="login-pw" class="input" type="password" placeholder="비밀번호"
+               autocomplete="current-password" />
+        <p id="login-error" class="err hidden"></p>
+        <button type="submit" class="btn primary" id="login-btn">로그인</button>
+      </form>
+    </section>
+
+    <!-- 메인 -->
+    <section id="main" class="screen hidden">
+      <header class="topbar">
+        <button id="day-prev" class="icon-btn" aria-label="이전 날">‹</button>
+        <div class="date-wrap">
+          <div id="date-big" class="date-big"></div>
+          <div id="date-sub" class="date-sub"></div>
+        </div>
+        <button id="day-next" class="icon-btn" aria-label="다음 날">›</button>
+      </header>
+
+      <div class="progress-row">
+        <div class="bar"><div id="bar-fill" class="bar-fill"></div></div>
+        <span id="progress-text" class="progress-text">—</span>
+        <button id="btn-today" class="chip">오늘</button>
+      </div>
+
+      <ul id="list" class="list"></ul>
+      <p id="empty" class="empty hidden">할 일이 없습니다.</p>
+
+      <!-- 하단 입력 -->
+      <form id="add-form" class="add-bar">
+        <input id="add-input" class="input" type="text" placeholder="할 일 입력"
+               autocomplete="off" enterkeyhint="done" />
+        <button type="submit" class="btn primary add-btn" aria-label="추가">＋</button>
+      </form>
+
+      <button id="btn-menu" class="menu-btn" aria-label="메뉴">⋯</button>
+    </section>
+
+    <!-- 상세 -->
+    <section id="detail" class="screen sheet hidden">
+      <header class="sheet-head">
+        <button id="detail-back" class="text-btn">‹ 뒤로</button>
+        <span>상세</span>
+        <button id="detail-del" class="text-btn danger">삭제</button>
+      </header>
+      <div class="sheet-body">
+        <input id="d-title" class="title-input" placeholder="제목" />
+        <label class="fld">날짜<input id="d-date" type="date" class="input" /></label>
+        <label class="fld">소요 시간<input id="d-time" type="text" class="input" placeholder="예: 2시간" /></label>
+        <label class="fld">우선순위
+          <select id="d-priority" class="input">
+            <option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option>
+          </select>
+        </label>
+        <label class="fld">상태
+          <select id="d-status" class="input">
+            <option value="todo">할 일</option><option value="doing">진행중</option><option value="done">완료</option>
+          </select>
+        </label>
+        <label class="fld">특이사항
+          <textarea id="d-notes" class="notes" rows="6" placeholder="메모를 자유롭게 적으세요"></textarea>
+        </label>
+        <p id="d-saved" class="saved"></p>
+      </div>
+    </section>
+
+    <!-- 메뉴 -->
+    <div id="menu" class="overlay hidden">
+      <div class="menu-card">
+        <p id="me-name" class="me"></p>
+        <button id="btn-reload" class="btn ghost">새로고침</button>
+        <button id="btn-logout" class="btn ghost">로그아웃</button>
+        <button id="menu-close" class="btn ghost">닫기</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
