@@ -115,43 +115,61 @@ function renderDate() {
 const PRIO = { high: '높음', normal: '보통', low: '낮음' };
 const STAT = { todo: '할 일', doing: '진행중', done: '완료' };
 
+// 휴가 항목은 '완료' 대상이 아니므로 체크박스 없이 빨간색으로 표시한다.
+// 정확히 이 단어만 인식한다 ("연차 정산 보고서" 같은 일반 업무는 제외)
+const LEAVE_WORDS = ['연차', '오전반차', '오후반차'];
+const isLeave = (title) => LEAVE_WORDS.includes(String(title || '').trim());
+
 function render() {
   const list = $('#list');
   list.innerHTML = '';
   $('#empty').classList.toggle('hidden', state.tasks.length > 0);
 
-  const done = state.tasks.filter((t) => t.status === 'done').length;
-  const pct = state.tasks.length ? Math.round((done / state.tasks.length) * 100) : 0;
+  // 진행률은 휴가를 뺀 실제 업무만으로 계산한다
+  const work = state.tasks.filter((t) => !isLeave(t.title));
+  const done = work.filter((t) => t.status === 'done').length;
+  const pct = work.length ? Math.round((done / work.length) * 100) : 0;
   $('#bar-fill').style.width = pct + '%';
-  $('#progress-text').textContent = state.tasks.length ? `${done}/${state.tasks.length}` : '—';
+  $('#progress-text').textContent = work.length ? `${done}/${work.length}` : '—';
 
   for (const t of state.tasks) {
+    const leave = isLeave(t.title);
     const li = document.createElement('li');
-    li.className = `item prio-${t.priority}${t.status === 'done' ? ' done' : ''}`;
+    li.className = `item prio-${t.priority}${t.status === 'done' ? ' done' : ''}${leave ? ' leave' : ''}`;
 
-    const chk = document.createElement('input');
-    chk.type = 'checkbox';
-    chk.className = 'chk';
-    chk.checked = t.status === 'done';
+    // 휴가는 완료 개념이 없으므로 체크박스를 만들지 않는다
+    let chk = null;
+    if (!leave) {
+      chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'chk';
+      chk.checked = t.status === 'done';
+    }
 
     const body = document.createElement('div');
     body.className = 'item-body';
-    const meta = [
-      t.due_time ? '⏱ ' + t.due_time : '',
-      PRIO[t.priority],
-      STAT[t.status],
-      t.notes ? '📝' : '',
-    ].filter(Boolean);
+    const meta = leave
+      ? [t.notes ? '📝' : ''].filter(Boolean)
+      : [
+          t.due_time ? '⏱ ' + t.due_time : '',
+          PRIO[t.priority],
+          STAT[t.status],
+          t.notes ? '📝' : '',
+        ].filter(Boolean);
     body.innerHTML = `<div class="item-title"></div><div class="item-meta">${
       meta.map((m) => `<span>${m}</span>`).join('')
     }</div>`;
     body.querySelector('.item-title').textContent = t.title;
 
-    chk.addEventListener('change', () =>
-      update(t.id, { status: chk.checked ? 'done' : 'todo' }));
     body.addEventListener('click', () => openDetail(t));
 
-    li.append(chk, body);
+    if (chk) {
+      chk.addEventListener('change', () =>
+        update(t.id, { status: chk.checked ? 'done' : 'todo' }));
+      li.append(chk, body);
+    } else {
+      li.append(body);
+    }
     list.appendChild(li);
   }
 }

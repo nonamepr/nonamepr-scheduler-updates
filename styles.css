@@ -121,6 +121,19 @@ select.input option { color: #111; background: #fff; }
 .assigner { color: #f0a94c; }
 .empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
 
+/* 휴가(연차·오전반차·오후반차) — 체크박스 없이 빨간색 */
+.item.leave {
+  border-left-color: var(--high);
+  background: rgba(255, 107, 107, 0.14);
+  opacity: 1;
+  padding-left: 18px;
+}
+.item.leave .item-title {
+  color: var(--high);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 /* ---------- 하단 입력 ---------- */
 .add-bar {
   position: fixed; left: 0; right: 0; bottom: 0;
