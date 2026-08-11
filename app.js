@@ -120,12 +120,6 @@ const STAT = { todo: '할 일', doing: '진행중', done: '완료' };
 const LEAVE_WORDS = ['연차', '오전반차', '오후반차'];
 const isLeave = (title) => LEAVE_WORDS.includes(String(title || '').trim());
 
-// 업체 태그는 이름에서 항상 같은 색을 만든다
-function tagColor(tag) {
-  let h = 0;
-  for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) % 360;
-  return `hsl(${h}, 60%, 62%)`;
-}
 
 function render() {
   const list = $('#list');
@@ -164,11 +158,9 @@ function render() {
           t.notes ? '📝' : '',
         ].filter(Boolean);
     body.innerHTML = `<div class="item-title"></div><div class="item-meta">${
-      (t.tag ? `<span class="tag-chip" style="background:${tagColor(t.tag)}22;color:${tagColor(t.tag)}"></span>` : '') +
       meta.map((m) => `<span>${m}</span>`).join('')
     }</div>`;
     body.querySelector('.item-title').textContent = t.title;
-    if (t.tag) body.querySelector('.tag-chip').textContent = t.tag;
 
     body.addEventListener('click', () => openDetail(t));
 
@@ -219,7 +211,6 @@ function openDetail(t) {
   state.detailId = t.id;
   $('#d-title').value = t.title;
   $('#d-date').value = t.date;
-  $('#d-tag').value = t.tag || '';
   $('#d-time').value = t.due_time || '';
   $('#d-priority').value = t.priority;
   $('#d-status').value = t.status;
@@ -244,7 +235,6 @@ async function saveDetail(patch) {
 }
 $('#d-title').addEventListener('change', (e) => saveDetail({ title: e.target.value.trim() }));
 $('#d-date').addEventListener('change', (e) => saveDetail({ date: e.target.value }));
-$('#d-tag').addEventListener('change', (e) => saveDetail({ tag: e.target.value.trim() }));
 $('#d-time').addEventListener('change', (e) => saveDetail({ due_time: e.target.value }));
 $('#d-priority').addEventListener('change', (e) => saveDetail({ priority: e.target.value }));
 $('#d-status').addEventListener('change', (e) => saveDetail({ status: e.target.value }));
