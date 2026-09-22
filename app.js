@@ -89,9 +89,10 @@ async function start() {
 async function load() {
   renderDate();
   // 휴대폰에서는 "내 할 일"만 본다 (확인·체크 용도)
+  // v2.2.0: 여러 명이 함께 맡은 업무(함께 담당)도 내 할 일로 보인다
   const { data, error } = await sb
     .from('tasks').select('*')
-    .eq('owner_id', state.me.id)
+    .or(`owner_id.eq.${state.me.id},co_owner_ids.cs.{${state.me.id}}`)
     .eq('date', state.date);
 
   if (error) return toast(msgOf(error), true);
@@ -247,8 +248,10 @@ $('#d-notes').addEventListener('input', (e) => {
 $('#detail-del').addEventListener('click', async () => {
   if (!state.detailId) return;
   if (!confirm('이 할 일을 삭제할까요?')) return;
-  const { error } = await sb.from('tasks').delete().eq('id', state.detailId);
+  const { data, error } = await sb.from('tasks').delete().eq('id', state.detailId).select('id');
   if (error) return toast(msgOf(error), true);
+  // 여러 명이 함께 맡은 업무는 대표 담당자(또는 관리자)만 지울 수 있다
+  if (!data || !data.length) return toast('함께 맡은 업무는 대표 담당자만 삭제할 수 있습니다.', true);
   closeDetail();
   toast('삭제했습니다');
 });
