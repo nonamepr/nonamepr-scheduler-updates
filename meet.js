@@ -5,7 +5,7 @@
 import {
   WD, state, api, actor, $, $$, esc, todayStr, parseDate, fmt, dateLabel, shortDate, cleanErr,
   toast, confirmSheet, canManage, nav,
-} from './core.js';
+} from './core.js?v=3.0.1';
 
 const ST = { doing: '진행 중', done: '완료', hold: '보류' };
 const NEXT = { doing: 'done', done: 'hold', hold: 'doing' };

@@ -12,9 +12,43 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="스케줄러" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=3.0.1" />
+    <script>
+      // 시작 지킴이 (모듈이 아닌 보통 스크립트라 앱 파일이 깨져도 돈다)
+      // 앱 파일을 못 읽거나 새 파일·예전 파일이 섞여 멈추면 까만 화면으로 두지 않고 한 번 스스로 새로 받는다.
+      (function () {
+        var failed = false;
+        function shown() {
+          var l = document.getElementById('login'), a = document.getElementById('app');
+          return (l && !l.classList.contains('hidden')) || (a && !a.classList.contains('hidden'));
+        }
+        function hardReload() {
+          var p = [];
+          try { p.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })); } catch (e) {}
+          try { p.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })); } catch (e) {}
+          Promise.all(p).catch(function () {}).then(function () { location.replace(location.pathname + '?r=' + Date.now()); });
+        }
+        function rescue(auto) {
+          if (shown()) return;
+          var tried = false;
+          try { tried = sessionStorage.getItem('nm.reboot') === '1'; } catch (e) {}
+          if (auto && !tried) { try { sessionStorage.setItem('nm.reboot', '1'); } catch (e) {} hardReload(); return; }
+          var b = document.getElementById('boot');
+          if (!b) return;
+          b.innerHTML = '<p>화면을 불러오지 못했습니다.</p><p class="boot-sub">인터넷 연결을 확인한 뒤 아래 버튼을 눌러 주세요.</p><button id="boot-retry" class="btn primary">새로 받기</button>';
+          document.getElementById('boot-retry').onclick = hardReload;
+        }
+        window.__bootRescue = rescue;
+        window.__hardReload = hardReload;
+        window.addEventListener('error', function () { if (!shown() && !failed) { failed = true; setTimeout(function () { rescue(true); }, 300); } }, true);
+        setTimeout(function () { rescue(false); }, 12000);
+      })();
+    </script>
   </head>
   <body>
+    <!-- 시작 화면 (앱이 뜨면 사라진다) -->
+    <div id="boot" class="boot"><img src="icons/icon-192.png" alt="" class="login-logo" /><p>불러오는 중…</p></div>
+
     <!-- 로그인 -->
     <section id="login" class="hidden">
       <form id="login-form" class="login-box">
@@ -153,6 +187,6 @@
 
     <div id="toast" class="toast hidden"></div>
     <span id="app-version" class="hidden"></span>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=3.0.1"></script>
   </body>
 </html>

@@ -3,7 +3,7 @@
 import {
   APP_VERSION, WD, state, api, actor, $, $$, esc, todayStr, parseDate, addDays, fmt, dateLabel, cleanErr, timeAgo, debounce,
   toast, confirmSheet, inputSheet, sheet, openPage, closeAllPages, ownerPicker, ownerOptions, canManage, coOf, ownerIdsOf, ownerNames, nav,
-} from './core.js';
+} from './core.js?v=3.0.1';
 
 // ---------- 더보기 탭 ----------
 nav.moreTab = async () => {
@@ -79,7 +79,12 @@ const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in win
 async function rpc(name, args) {
   if (api.test) return window.__testBackend.call('rpc', name, args || {});
   const { data, error } = await api.b.sb.rpc(name, args || {});
-  if (error) throw new Error(/push_|function|schema cache/i.test(error.message) ? '서버에 휴대폰 알림 준비가 안 됐습니다. 관리자에게 문의하세요.' : error.message);
+  if (error) {
+    const m = String(error.message || '');
+    if (/permission denied|JWT|not authenticated/i.test(m)) throw new Error('로그인이 풀렸습니다. 로그아웃 후 다시 로그인해 주세요.');
+    if (/Could not find the function|schema cache|does not exist/i.test(m)) throw new Error('서버에 휴대폰 알림 준비가 안 됐습니다. 관리자에게 문의하세요.');
+    throw new Error('휴대폰 알림 등록 실패: ' + m);
+  }
   return data;
 }
 async function publicKey() {

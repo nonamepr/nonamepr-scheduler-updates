@@ -4,7 +4,7 @@
 import {
   WD, state, api, actor, $, $$, esc, todayStr, cleanErr, timeAgo, debounce,
   toast, confirmSheet, inputSheet, pickSheet, sheet, openPage, ownerPicker, nav,
-} from './core.js';
+} from './core.js?v=3.0.1';
 
 const MEDIA_ORDER = ['파워링크', '파워컨텐츠', '카카오', '플레이스 광고', '유튜브', '구글광고', '블로그', '당근마켓', 'sns광고'];
 const EMOJIS = ['👍', '✅', '👀', '🙏', '❤️', '😂'];

@@ -89,6 +89,11 @@ textarea.input { resize: none; line-height: 1.5; }
 .badge { background: #e5484d; color: #fff; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 6px; min-width: 18px; text-align: center; }
 .badge.inline { display: inline-block; vertical-align: middle; }
 
+/* ---------- 시작 화면 ---------- */
+.boot { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; color: var(--muted); }
+.boot .btn { margin-top: 6px; min-width: 160px; }
+.boot-sub { font-size: 13px; }
+
 /* ---------- 로그인 ---------- */
 #login { min-height: 100dvh; display: flex; justify-content: center; align-items: center; padding: 24px; }
 .login-box { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; text-align: center; }

@@ -2,9 +2,9 @@
 // · 화면 파일은 '인터넷 먼저' — 새 버전을 올리면 다음에 열 때 바로 바뀐다 (안 되면 저장해 둔 것으로)
 // · 일정 데이터(서버 통신)는 저장하지 않는다
 // · 휴대폰 알림(웹 푸시)을 받아 띄우고, 누르면 앱의 해당 화면을 연다
-const CACHE = 'scheduler-shell-v3.0.0';
+const CACHE = 'scheduler-shell-v3.0.1';
 const SHELL = [
-  './', './index.html', './styles.css', './app.js', './core.js', './insp.js', './meet.js', './more.js', './cloud-store.js',
+  './', './index.html', './styles.css', './app.js?v=3.0.1', './core.js?v=3.0.1', './insp.js?v=3.0.1', './meet.js?v=3.0.1', './more.js?v=3.0.1', './cloud-store.js?v=3.0.1',
   './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
 ];
 
@@ -23,8 +23,12 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.hostname.endsWith('supabase.co')) return;
+  // 같은 주소의 화면 파일은 '바뀌었는지' 서버에 확인하고 받는다 (GitHub Pages 의 10분 저장 때문에 예전 파일이 섞이지 않게)
+  // (첫 화면(navigate)은 그대로 — 그 요청은 새로 만들 수 없다. 대신 그 안의 파일 주소에 버전이 붙어 있다)
+  const req = url.origin === location.origin && e.request.mode !== 'navigate'
+    ? new Request(e.request.url, { cache: 'no-cache', credentials: 'same-origin' }) : e.request;
   e.respondWith(
-    fetch(e.request)
+    fetch(req)
       .then((res) => {
         if (res && res.ok && url.origin === location.origin) {
           const copy = res.clone();
@@ -32,7 +36,7 @@ self.addEventListener('fetch', (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(e.request).then((r) => r || caches.match('./index.html')))
+      .catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || (e.request.mode === 'navigate' ? caches.match('./index.html') : undefined)))
   );
 });
 

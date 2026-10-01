@@ -1,7 +1,7 @@
 // 휴대폰 웹앱 공용 부품 — 상태 · 날짜 · 화면 도구(알림창·확인창·입력창·페이지) · 담당자 고르기
 // 서버 조회·저장은 PC 와 같은 코드(cloud-store.js)를 api 로 쓴다.
 
-export const APP_VERSION = '3.0.0';
+export const APP_VERSION = '3.0.1';  // 바꾸면 npm run web 이 파일 주소의 ?v= 도 맞춘다
 export const WD = ['일', '월', '화', '수', '목', '금', '토'];
 
 export const state = {

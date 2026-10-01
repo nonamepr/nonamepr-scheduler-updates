@@ -6,10 +6,10 @@ import {
   APP_VERSION, WD, state, api, actor, $, $$, esc, fmt, todayStr, parseDate, addDays, dateLabel, cleanErr,
   PRIO, STAT, isLeave, userById, canManage, coOf, ownerIdsOf, ownerNames, canEditTask, assignerOf,
   toast, confirmSheet, inputSheet, openPage, closeAllPages, ownerPicker, ownerOptions, nav, debounce,
-} from './core.js';
-import './insp.js';
-import './meet.js';
-import './more.js';
+} from './core.js?v=3.0.1';
+import './insp.js?v=3.0.1';
+import './meet.js?v=3.0.1';
+import './more.js?v=3.0.1';
 
 const SUPABASE_URL = 'https://zqtzyckacbogwicrjshi.supabase.co';
 // 공개를 전제로 한 키입니다. 실제 접근 통제는 데이터베이스 권한 규칙(RLS)이 합니다.
@@ -28,7 +28,7 @@ async function connect() {
   }
   const [{ createClient }, { defineCloudStore }] = await Promise.all([
     import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'),
-    import('./cloud-store.js'),
+    import('./cloud-store.js?v=3.0.1'),
   ]);
   const CloudStore = defineCloudStore({
     '@supabase/supabase-js': { createClient },
@@ -52,9 +52,18 @@ function savedToken() {
 }
 
 // ---------- 로그인 ----------
-function showLogin() {
+// 앱이 뜨면 시작 화면을 치우고 '스스로 새로 받기' 표시를 지운다
+function booted() {
+  const b = $('#boot');
+  if (b) b.remove();
+  try { sessionStorage.removeItem('nm.reboot'); } catch {}
+}
+
+function showLogin(msg) {
+  booted();
   $('#app').classList.add('hidden');
   $('#login').classList.remove('hidden');
+  if (msg) { $('#login-error').textContent = msg; $('#login-error').classList.remove('hidden'); }
 }
 
 $('#login-form').addEventListener('submit', async (e) => {
@@ -99,6 +108,7 @@ async function onLoggedIn(user) {
   state.date = todayStr();
   const t = new Date();
   state.calY = t.getFullYear(); state.calM = t.getMonth(); state.calSel = todayStr();
+  booted();
   $('#login').classList.add('hidden');
   $('#app').classList.remove('hidden');
   // 반복·점검 업무 미리 만들기 (서버가 한 번만 만든다)
@@ -474,7 +484,9 @@ $('#app-version').textContent = 'v' + APP_VERSION;
   if (user) {
     try { const t = await api.b.getRefreshToken(); if (t) localStorage.setItem(TOKEN_KEY, t); } catch {}
     try { localStorage.removeItem(OLD_SESSION_KEY); } catch {}
-    await onLoggedIn(user);
+    // 시작 중 문제가 생겨도 까만 화면으로 두지 않고 로그인 화면에 이유를 보여 준다
+    try { await onLoggedIn(user); }
+    catch (err) { showLogin('시작하지 못했습니다: ' + cleanErr(err) + ' — 다시 로그인해 주세요.'); }
   } else showLogin();
 })();
 
