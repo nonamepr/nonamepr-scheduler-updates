@@ -1,18 +1,15 @@
-// 앱 화면(껍데기)만 캐시해 오프라인에서도 열리게 한다.
-// 실제 일정 데이터는 항상 서버에서 새로 받아온다.
-const CACHE = 'scheduler-shell-v1';
+// 휴대폰 웹앱 서비스 워커 (v3.0)
+// · 화면 파일은 '인터넷 먼저' — 새 버전을 올리면 다음에 열 때 바로 바뀐다 (안 되면 저장해 둔 것으로)
+// · 일정 데이터(서버 통신)는 저장하지 않는다
+// · 휴대폰 알림(웹 푸시)을 받아 띄우고, 누르면 앱의 해당 화면을 연다
+const CACHE = 'scheduler-shell-v3.0.0';
 const SHELL = [
-  './',
-  './index.html',
-  './styles.css',
-  './app.js',
-  './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
+  './', './index.html', './styles.css', './app.js', './core.js', './insp.js', './meet.js', './more.js', './cloud-store.js',
+  './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -25,11 +22,7 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-
-  // 서버 통신(일정 데이터·로그인)은 캐시하지 않는다
-  if (url.hostname.endsWith('supabase.co') || e.request.method !== 'GET') return;
-
-  // 화면 파일은 네트워크 우선, 실패 시 캐시 사용
+  if (e.request.method !== 'GET' || url.hostname.endsWith('supabase.co')) return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {
@@ -41,4 +34,35 @@ self.addEventListener('fetch', (e) => {
       })
       .catch(() => caches.match(e.request).then((r) => r || caches.match('./index.html')))
   );
+});
+
+// ---------- 휴대폰 알림 ----------
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data ? e.data.text() : '' }; }
+  const title = d.title || '무명기획 스케줄러';
+  e.waitUntil(self.registration.showNotification(title, {
+    body: d.body || '',
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-192.png',
+    data: { url: d.url || './' },
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const target = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const w of wins) {
+      if (w.url.startsWith(self.registration.scope)) {
+        await w.focus();
+        w.postMessage({ type: 'open', url: target });
+        return;
+      }
+    }
+    await self.clients.openWindow(target);
+  })());
 });
